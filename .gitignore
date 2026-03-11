@@ -1,0 +1,41 @@
+# Binary / hasil build (jangan di-commit)
+api
+api.exe
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Folder output go build (biasanya go build -o bin/)
+bin/
+dist/
+
+# Dependency & cache Go
+vendor/
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Environment & rahasia (jangan pernah commit password/token)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log & temporary
+*.log
+tmp/
+temp/
+.cache/
