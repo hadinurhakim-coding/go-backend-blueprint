@@ -7,13 +7,14 @@ import (
 	"go-backend-blueprint/internal/config"
 	"go-backend-blueprint/internal/database"
 	"go-backend-blueprint/internal/handler"
+	"go-backend-blueprint/internal/migrate"
 	"go-backend-blueprint/internal/store"
 )
 
 func main() {
 	cfg := config.FromEnv()
 
-	// Opsional: sambungkan ke database jika DB_DSN diset. Koneksi siap untuk dipakai nanti (misalnya oleh store).
+	var itemStore store.ItemStore
 	if cfg.DBDSN != "" {
 		db, err := database.Open(cfg.DBDSN)
 		if err != nil {
@@ -23,12 +24,15 @@ func main() {
 		if err := database.Ping(db); err != nil {
 			log.Fatalf("database ping: %v", err)
 		}
-		log.Println("database: connected")
-		_ = db // nantinya db bisa diinjeksi ke store (misalnya PostgresStore)
+		if err := migrate.Run(db, "migrations"); err != nil {
+			log.Fatalf("migrate: %v", err)
+		}
+		log.Println("database: connected, migrations ok")
+		itemStore = store.NewPostgresStore(db)
+	} else {
+		itemStore = store.NewMemoryStore()
 	}
 
-	// Store in-memory untuk CRUD Item. Nantinya bisa diganti dengan store yang pakai database.
-	itemStore := store.NewMemoryStore()
 	itemsHandler := &handler.ItemsHandler{Store: itemStore}
 
 	// Endpoint /health: untuk health check

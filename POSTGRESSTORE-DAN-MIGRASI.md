@@ -182,4 +182,55 @@ Kalau kita lanjut ke implementasi, urutan yang masuk akal:
 
 Dengan begitu Anda bisa mencoba PostgreSQL lokal dengan langkah yang jelas dan kode yang mengikuti pola yang sudah ada (ItemStore).
 
-Jika Anda mau, langkah berikutnya bisa kita lakukan **implementasi nyata** (file migrasi + PostgresStore + perubahan di main) langkah demi langkah seperti sebelumnya.
+---
+
+## 10. Implementasi Selesai — Cara Menjalankan dengan PostgreSQL
+
+Implementasi sudah ada di proyek. Untuk menjalankan aplikasi **dengan database blueprint** (PostgreSQL lokal):
+
+### 10.1 Set environment variable DB_DSN (PowerShell)
+
+Di **PowerShell**, sebelum menjalankan aplikasi, set variabel lingkungan `DB_DSN` dengan connection string ke database Anda. Untuk database **blueprint** dan password **BpostgresqlD** (user `postgres`, port default 5432):
+
+```powershell
+$env:DB_DSN = "postgres://postgres:BpostgresqlD@localhost:5432/blueprint?sslmode=disable"
+```
+
+*(Jika user atau port Anda berbeda, sesuaikan USER dan PORT di URL.)*
+
+### 10.2 Jalankan aplikasi
+
+Dari **folder root proyek** (tempat ada `go.mod` dan folder `migrations`):
+
+```powershell
+go run ./cmd/api
+```
+
+Yang terjadi:
+1. Aplikasi membaca `DB_DSN` dari env.
+2. Konek ke PostgreSQL, lalu **ping**.
+3. **Migrasi** dijalankan: tabel `schema_migrations` dan `items` dibuat (jika belum ada).
+4. Log muncul: **"database: connected, migrations ok"**.
+5. CRUD Item memakai **PostgresStore** (data tersimpan di tabel `items` di database).
+
+### 10.3 Cek bahwa data tersimpan di database
+
+- **Lewat API:**  
+  - POST `http://localhost:8080/items` dengan body `{"name":"Buku"}` → response 201 dengan item (id UUID).  
+  - GET `http://localhost:8080/items` → daftar item.  
+  - Matikan server (Ctrl+C), jalankan lagi `go run ./cmd/api`, GET `/items` lagi → data masih ada (karena tersimpan di PostgreSQL).
+
+- **Lewat database:** Buka pgAdmin atau `psql`, pilih database `blueprint`, jalankan:
+  ```sql
+  SELECT * FROM items;
+  ```
+  Baris yang Anda buat lewat API akan muncul di sini.
+
+### 10.4 Menjalankan tanpa database (in-memory)
+
+Jika **tidak** set `DB_DSN`, aplikasi tetap jalan dan memakai **MemoryStore** (data di RAM, hilang saat server stop):
+
+```powershell
+# Jangan set DB_DSN, langsung:
+go run ./cmd/api
+```

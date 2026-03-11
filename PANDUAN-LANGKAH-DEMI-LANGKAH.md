@@ -293,4 +293,4 @@ Agar nanti kita bisa buat **`internal/store/postgres.go`** yang mengimplementasi
   `postgres://user:password@localhost:5432/mydb?sslmode=disable`  
   Lalu jalankan lagi; di log harus muncul **"database: connected"**. Jika PostgreSQL belum jalan atau DSN salah, aplikasi akan exit dengan error (sesuai design: fail fast saat startup).
 
-**Langkah berikutnya (nanti):** implementasi `PostgresStore` yang pakai `*sql.DB` untuk menyimpan Item ke tabel, migrasi skema, dan/atau Redis, Docker, dll.
+**Langkah berikutnya:** Lihat **POSTGRESSTORE-DAN-MIGRASI.md** untuk penjelasan detail dan **implementasi PostgresStore + migrasi** (sudah ada di proyek). Set env `DB_DSN` ke connection string PostgreSQL lalu jalankan `go run ./cmd/api` — data Item akan tersimpan di database. Setelah itu bisa lanjut: testing, middleware, Docker, dll.
